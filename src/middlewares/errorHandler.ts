@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
 
 const errorHandler = (
   err: any,
@@ -17,6 +18,21 @@ const errorHandler = (
     res.status(409).json({
       message: "Cette valeur existe déjà",
       field: Object.keys(err.keyPattern)[0],
+    });
+  }
+
+  if (err.name === "CastError") {
+    res.status(400).json({});
+  }
+
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      success: false,
+      message: "Erreur de validation",
+      errors: err.issues.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      })),
     });
   }
 
