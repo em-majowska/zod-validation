@@ -1,6 +1,6 @@
 import z from "zod";
-import User, { IUser, IUserDocument } from "../models/User";
-import { TGetUsersQuery } from "../validations/userSchemas";
+import User, { IUserDocument } from "../models/User";
+import { TGetUsersQuery, TUser } from "../validations/userSchemas";
 
 export const getAllUsers = async (options: TGetUsersQuery) => {
   const { page, limit, isActive, role } = options;
@@ -30,7 +30,7 @@ export const getUserById = async (
   return await User.findById(id);
 };
 
-export const createUser = async (data: IUser): Promise<IUserDocument> => {
+export const createUser = async (data: TUser): Promise<IUserDocument> => {
   const user = new User(data);
   await user.save();
   return user;
@@ -38,7 +38,7 @@ export const createUser = async (data: IUser): Promise<IUserDocument> => {
 
 export const updateUser = async (
   id: string,
-  data: IUser,
+  data: TUser,
 ): Promise<IUserDocument | null> => {
   return await User.findByIdAndUpdate(id, data, { returnDocument: "after" });
 };

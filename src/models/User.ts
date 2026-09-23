@@ -1,17 +1,9 @@
 import { Document, model, Schema } from "mongoose";
+import { TUser } from "../validations/userSchemas";
 
 export const ROLE = ["admin", "user", "moderator"] as const;
 
-export interface IUser {
-  username: string;
-  email: string;
-  password: string;
-  age: number;
-  role: (typeof ROLE)[number];
-  isActive: boolean;
-}
-
-export type IUserDocument = IUser & Document;
+export type IUserDocument = TUser & Document;
 
 const userSchema = new Schema(
   {
