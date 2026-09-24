@@ -1,14 +1,19 @@
-import z from "zod";
 import User, { IUserDocument } from "../models/User";
-import { TGetUsersQuery, TUser } from "../validations/userSchemas";
+import {
+  TGetUsersQuery,
+  TCreateUserInput,
+  TUpdateUserInput,
+} from "../validations/userSchemas";
 
 export const getAllUsers = async (options: TGetUsersQuery) => {
   const { page, limit, isActive, role } = options;
+
   const filter: Record<string, any> = {};
   if (isActive !== undefined) filter.isActive = isActive;
   if (role !== undefined) filter.role = role;
 
   const users = await User.find(filter)
+    .select("-password")
     .skip((page - 1) * limit)
     .limit(limit);
 
@@ -17,8 +22,8 @@ export const getAllUsers = async (options: TGetUsersQuery) => {
 
   return {
     data: users,
-    page: options.page,
-    limit: options.limit,
+    page: page,
+    limit: limit,
     total,
     totalPages,
   };
@@ -27,10 +32,12 @@ export const getAllUsers = async (options: TGetUsersQuery) => {
 export const getUserById = async (
   id: string,
 ): Promise<IUserDocument | null> => {
-  return await User.findById(id);
+  return await User.findById(id).select("-password");
 };
 
-export const createUser = async (data: TUser): Promise<IUserDocument> => {
+export const createUser = async (
+  data: TCreateUserInput,
+): Promise<IUserDocument> => {
   const user = new User(data);
   await user.save();
   return user;
@@ -38,7 +45,7 @@ export const createUser = async (data: TUser): Promise<IUserDocument> => {
 
 export const updateUser = async (
   id: string,
-  data: TUser,
+  data: TUpdateUserInput,
 ): Promise<IUserDocument | null> => {
   return await User.findByIdAndUpdate(id, data, { returnDocument: "after" });
 };

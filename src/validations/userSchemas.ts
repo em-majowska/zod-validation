@@ -1,13 +1,18 @@
 import z from "zod";
 import { ROLE } from "../models/User";
 
+const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+
 export const userBodySchema = z.object({
   username: z.string().min(3).max(20).trim(),
   email: z.email().toLowerCase(),
   password: z
     .string()
     .min(8)
-    .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
+    .regex(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, {
+      message:
+        "Le mot de passe doit contenit au moins une majuscule, une minuscule eet un chiffre.",
+    }),
   age: z.number().int().min(18).max(100),
   role: z.enum(ROLE),
   isActive: z.boolean().default(true),
@@ -17,21 +22,30 @@ export const createUserSchema = z.object({
   body: userBodySchema,
 });
 
-export type TUser = z.infer<typeof userBodySchema>;
-
 export const updateUserSchema = z.object({
-  params: z.object({ id: z.string().regex(/^[0-9a-fA-F]{24}$/) }),
+  params: z.object({
+    id: z.string().regex(objectIdRegex, { message: "ID invalide" }),
+  }),
   body: userBodySchema.partial(),
 });
 
 export const getUserSchema = z.object({
-  params: z.object({ id: z.string().regex(/^[0-9a-fA-F]{24}$/) }),
+  params: z.object({
+    id: z.string().regex(objectIdRegex, { message: "ID invalide" }),
+  }),
 });
 
 export const getUsersQuerySchema = z.object({
   query: z.object({
-    page: z.coerce.number().int().min(1).default(1),
-    limit: z.coerce.number().int().min(1).max(100).default(10),
+    page: z
+      .string()
+      .default("1")
+      .transform((val) => parseInt(val, 10)),
+    limit: z
+      .string()
+      .default("10")
+      .transform((val) => parseInt(val, 10))
+      .pipe(z.number().int().min(1).max(100)),
     role: z.enum(ROLE).optional(),
     isActive: z
       .enum(["true", "false"])
@@ -40,6 +54,8 @@ export const getUsersQuerySchema = z.object({
   }),
 });
 
+export type TCreateUserInput = z.infer<typeof userBodySchema>;
+export type TUpdateUserInput = z.infer<typeof updateUserSchema>["body"];
 export type TGetUsersQuery = z.infer<typeof getUsersQuerySchema>["query"];
 
 // Créez les schémas suivants :

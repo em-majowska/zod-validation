@@ -1,17 +1,18 @@
 import { Document, model, Schema } from "mongoose";
-import { TUser } from "../validations/userSchemas";
+import { TCreateUserInput } from "../validations/userSchemas";
 
 export const ROLE = ["admin", "user", "moderator"] as const;
 
-export type IUserDocument = TUser & Document;
+export type IUserDocument = TCreateUserInput & Document;
 
-const userSchema = new Schema(
+const userSchema = new Schema<IUserDocument>(
   {
     username: {
       type: String,
       required: true,
       minLength: 3,
       maxLength: 20,
+      unique: true,
     },
     email: {
       type: String,

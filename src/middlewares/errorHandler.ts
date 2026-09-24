@@ -10,7 +10,10 @@ const errorHandler = (
   if (err.name === "ValidationError") {
     return res.status(400).json({
       message: "Erreur de validation",
-      errors: Object.values(err.errors).map((e: any) => e.message),
+      errors: Object.values(err.errors).map((e: any) => ({
+        field: e.path,
+        message: e.message,
+      })),
     });
   }
 
@@ -22,7 +25,9 @@ const errorHandler = (
   }
 
   if (err.name === "CastError") {
-    res.status(400).json({});
+    res.status(400).json({
+      message: `Valeur invalide pour le champ "${err.path}"`,
+    });
   }
 
   if (err instanceof ZodError) {

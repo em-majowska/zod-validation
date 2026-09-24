@@ -24,6 +24,11 @@ export const getUserById = async (
 ): Promise<void> => {
   try {
     const user = await userService.getUserById(req.params.id as string);
+
+    if (!user) {
+      res.status(404).json({ message: "Utilisateur non trouvé" });
+      return;
+    }
     res.status(200).json(user);
   } catch (error) {
     next(error);
@@ -53,6 +58,11 @@ export const updateUser = async (
       req.params.id as string,
       req.body,
     );
+    if (!user) {
+      res.status(404).json({ message: "Utilisateur non trouvé" });
+      return;
+    }
+    await user.save();
     res.status(200).json(user);
   } catch (error) {
     next(error);
@@ -66,6 +76,11 @@ export const deleteUser = async (
 ): Promise<void> => {
   try {
     const user = await userService.deleteUser(req.params.id as string);
+
+    if (!user) {
+      res.status(404).json({ message: "Utilisateur non trouvé" });
+      return;
+    }
     res.status(200).json(user);
   } catch (error) {
     next(error);

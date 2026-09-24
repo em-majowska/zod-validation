@@ -3,12 +3,23 @@ import z from "zod";
 
 const validate = (schema: z.ZodType) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      schema.parse({ body: req.body, params: req.params, query: req.query });
-      next();
-    } catch (error) {
-      next(error);
+    const result = schema.safeParse({
+      body: req.body,
+      params: req.params,
+      query: req.query,
+    });
+
+    if (!result.success) {
+      // throw result.error
+      return next(result.error);
     }
+
+    const data = result.data as any;
+    if (data.body) req.body = data.body;
+    if (data.params) req.params = data.params;
+    if (data.query) req.query = data.query;
+
+    next();
   };
 };
 
